@@ -5,17 +5,16 @@ import java.util.List;
 
 @Entity
 public class Warehouse {
-    @Id // Wichtig: jakarta.persistence.Id nutzen!
-    private String warehouseID; // z.B. "001"
+    @Id
+    private String warehouseID;
 
     private String warehouseName;
     private String warehouseCity;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "warehouse_id") // Erzeugt einen Fremdschlüssel in der Produkt-Tabelle
+    @JoinColumn(name = "warehouse_id")
     private List<Product> productData;
 
-    // Getter und Setter
     public String getWarehouseID() { return warehouseID; }
     public void setWarehouseID(String warehouseID) { this.warehouseID = warehouseID; }
 

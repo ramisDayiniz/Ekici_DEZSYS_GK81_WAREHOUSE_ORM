@@ -24,51 +24,68 @@ public class Main {
     @Bean
     public CommandLineRunner initAllData(WarehouseRepository wRepo, PurchaseRepository pRepo) {
         return args -> {
-            // 1. Grundlagen: Warenhäuser und Produkte anlegen
+            // 1. Sicherstellen, dass Warenhäuser existieren
             if (wRepo.count() == 0) {
-                Warehouse w1 = new Warehouse();
-                w1.setWarehouseID("001");
-                w1.setWarehouseName("Linz Bahnhof");
-                w1.setWarehouseCity("Linz");
-
-                List<Product> products1 = new ArrayList<>();
-                for (int i = 1; i <= 5; i++) {
-                    Product p = new Product();
-                    p.setProductID("PROD-00" + i);
-                    p.setProductName("Bio Saft " + i);
-                    p.setProductQuantity(100 * i);
-                    products1.add(p);
-                }
-                w1.setProductData(products1);
-
-                Warehouse w2 = new Warehouse();
-                w2.setWarehouseID("002");
-                w2.setWarehouseName("Wien West");
-                w2.setWarehouseCity("Wien");
-
-                wRepo.save(w1);
-                wRepo.save(w2);
-                System.out.println("GK Warehouse-Daten geladen!");
+                wRepo.save(createWarehouse("001", "Linz Bahnhof", "Linz"));
+                wRepo.save(createWarehouse("002", "Wien West", "Wien"));
+                System.out.println("Warenhäuser neu angelegt.");
             }
 
-            // 2. Erweitert: 30 Käufe anlegen
-            if (pRepo.count() == 0) {
-                Warehouse w = wRepo.findById("001").orElse(null);
-                if (w != null && !w.getProductData().isEmpty()) {
-                    Product p = w.getProductData().get(0);
-                    List<Purchase> purchases = new ArrayList<>();
-                    for (int i = 1; i <= 30; i++) {
-                        Purchase sale = new Purchase();
-                        sale.setPurchaseDateTime("2026-03-18 10:00:" + (i < 10 ? "0" + i : i));
-                        sale.setAmount(i + 2);
-                        sale.setWarehouse(w);
-                        sale.setProduct(p);
-                        purchases.add(sale);
-                    }
-                    pRepo.saveAll(purchases);
-                    System.out.println("30 EK Purchase Records geladen!");
+            // 2. Daten für die Vertiefung
+            if (pRepo.count() < 300) {
+                pRepo.deleteAll();
+
+                List<Warehouse> warehouses = new ArrayList<>();
+                wRepo.findAll().forEach(warehouses::add);
+
+                if (warehouses.isEmpty()) {
+                    System.out.println("Fehler: Keine Warenhäuser gefunden!");
+                    return;
                 }
+
+                List<Purchase> bigData = new ArrayList<>();
+                java.util.Random rand = new java.util.Random();
+
+                for (int i = 0; i < 300; i++) {
+                    Purchase sale = new Purchase();
+
+                    // Zufälliges Warehouse wählen
+                    Warehouse randomW = warehouses.get(rand.nextInt(warehouses.size()));
+
+                    // Sicherstellen, dass das Warehouse Produkte hat
+                    List<Product> prods = randomW.getProductData();
+                    if (prods == null || prods.isEmpty()) continue;
+
+                    Product randomP = prods.get(rand.nextInt(prods.size()));
+
+                    int day = rand.nextInt(28) + 1;
+                    sale.setPurchaseDateTime("2026-03-" + (day < 10 ? "0" + day : day) + " 12:00:00");
+                    sale.setAmount(rand.nextInt(10) + 1);
+                    sale.setWarehouse(randomW);
+                    sale.setProduct(randomP);
+                    bigData.add(sale);
+                }
+                pRepo.saveAll(bigData);
+                System.out.println("300 Vertiefung Records erfolgreich geladen!");
             }
         };
+    }
+
+    // Hilfsmethode um Code sauber zu halten
+    private Warehouse createWarehouse(String id, String name, String city) {
+        Warehouse w = new Warehouse();
+        w.setWarehouseID(id);
+        w.setWarehouseName(name);
+        w.setWarehouseCity(city);
+        List<Product> products = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            Product p = new Product();
+            p.setProductID(id + "-P" + i);
+            p.setProductName("Produkt " + i);
+            p.setProductQuantity(100);
+            products.add(p);
+        }
+        w.setProductData(products);
+        return w;
     }
 }

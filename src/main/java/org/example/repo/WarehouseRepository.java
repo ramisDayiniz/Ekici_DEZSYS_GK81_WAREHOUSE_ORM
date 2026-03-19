@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface WarehouseRepository extends CrudRepository<Warehouse, String> {
     Optional<Warehouse> findByWarehouseID(String warehouseID);
-    Optional<Product> findByProductID(String productID);
 }

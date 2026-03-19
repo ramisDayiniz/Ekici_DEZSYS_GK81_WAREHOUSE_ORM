@@ -1,6 +1,8 @@
 package org.example;
 
+import org.example.Entity.Product;
 import org.example.Entity.Warehouse;
+import org.example.repo.ProductRepository;
 import org.example.repo.WarehouseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,9 @@ public class MainController {
 
 	@Autowired
 	private WarehouseRepository warehouseRepository;
+
+	@Autowired
+	private ProductRepository productRepository;
 
 	@PostMapping(path="/add") // Map ONLY POST Requests
 	public @ResponseBody String addNewUser (@RequestParam String name
@@ -39,6 +44,20 @@ public class MainController {
 	@GetMapping(path="/warehouses")
 	public @ResponseBody Iterable<Warehouse> getAllWarehouses() {
 		return warehouseRepository.findAll();
+	}
+
+	// EK: Einzelnes Produkt finden
+	@GetMapping("/product/{pId}")
+	public @ResponseBody Product getProduct(@PathVariable String pId) {
+		return productRepository.findByProductID(pId).orElse(null);
+	}
+
+	// EK: Ein Warehouse updaten
+	@PostMapping("/warehouse/update")
+	public @ResponseBody String updateWarehouse(@RequestBody Warehouse warehouse) {
+		// Da die warehouseID bereits existiert, überschreibt .save() den alten Datensatz
+		warehouseRepository.save(warehouse);
+		return "Warehouse updated";
 	}
 
 }

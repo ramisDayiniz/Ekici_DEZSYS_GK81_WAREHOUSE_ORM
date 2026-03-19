@@ -139,12 +139,10 @@ public interface WarehouseRepository extends CrudRepository<Warehouse, String> {
 
 ```java
 @GetMapping(path="/warehouses")
-	public @ResponseBody Iterable<Warehouse> getAllWarehouses() {
-		return warehouseRepository.findAll();
-	}
+    public @ResponseBody Iterable<Warehouse> getAllWarehouses() {
+        return warehouseRepository.findAll();
+    }
 ```
-
-
 
 ### application.properties
 
@@ -156,33 +154,21 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 ```
 
-
-
-
-
 ### Ergebnis
 
 ![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-10-11-31-24-image.png)
-
-
 
 ### Postman Test
 
 ![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-08-54-53-image.png)
 
-
-
 ![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-08-55-45-image.png)
-
-
 
 ![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-09-08-53-image.png)
 
 ### Datanbank Test
 
 ![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-08-56-22-image.png)
-
-
 
 
 
@@ -202,10 +188,50 @@ typische Methoden von dem **CrudRepository** Interface sind folgende:
 
 - `existsById(ID id)`: Prüft, ob ein Datensatz existiert.
 
-
-
 Für die speziellen Suchen nach `datawarehouseID` und `productID` müssen wir das Interface anpassen. Spring Data JPA ist so schlau, dass es SQL-Abfragen anhand von Methodennamen generieren kann (**Query Methods**).
+
+```java
+Optional<Warehouse> findByWarehouseID(String warehouseID);
+Optional<Product> findByProductID(String productID);
+```
+
+### Purchase Klasse
+
+Wir brauchen eine neue Entity `Purchase`, um Verkäufe zu tracken. Ein Kauf bezieht sich auf ein Produkt und ein Lager.
+
+```java
+@Entity
+public class Purchase {
+    @jakarta.persistence.Id // Das ist die richtige für MySQL/JPA
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String purchaseDateTime;
+    private Integer amount;
+
+    @ManyToOne
+    private Warehouse warehouse;
+
+    @ManyToOne
+    private Product product;
+```
+
+### Daten initialisieren
 
 ```java
 
 ```
+
+
+
+
+
+
+
+### Ergebnis
+
+![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-09-36-08-image.png)
+
+![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-09-37-19-image.png)
+
+![](C:\Users\ekici\AppData\Roaming\marktext\images\2026-03-18-09-40-13-image.png)
